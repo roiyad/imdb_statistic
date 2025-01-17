@@ -1,4 +1,4 @@
-class Reports:
+class Report:
     TOTAL_RUNTIME_BY_YEAR = 'total_runtime_by_year'
     TOTAL_RUNTIME = 'total_runtime'
     RATING_BY_ACTOR = 'rating_by_actor'

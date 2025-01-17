@@ -9,6 +9,7 @@ class IMDbColumn:
     TITLE = 'Title'
     YOUR_RATING = 'Your Rating'
     TITLE_TYPE = 'Title Type'
-    RUNTIME = 'Runtime'
+    RUNTIME = 'Runtime (mins)'
     CONST = 'Const'
     GENRES = 'Genres'
+    DATE_RATED = 'Date Rated'
