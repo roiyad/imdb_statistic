@@ -3,10 +3,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
 
 from conf import RENAME_IMDB_COLS_MAP, MOVIES_DATA_NECESSARY_COLUMNS, MAX_THREAD_POOL_SIZE
+from enums.reports import Report
 from maps import PARAMS_BY_REPORT_NAME
 from enums.columns import Column
 from enums.keys import Key
-from utils import add_missing_data_per_movie
+from utils import add_missing_data_per_movie, build_runtime_data, build_actors_data
 
 
 class MovieStatisticsFlow():
@@ -19,10 +20,14 @@ class MovieStatisticsFlow():
 
         reports = self.get_reports(movies_df)
 
+        presentation_data = self.build_data_for_presentation(reports)
+
         return reports
 
     def get_movies_df(self, file) -> pd.DataFrame:
         movies_df = pd.read_csv(file)
+
+        movies_df = movies_df.sample(100)
 
         movies_df = self.reshape_movies_df(movies_df)
 
@@ -63,3 +68,9 @@ class MovieStatisticsFlow():
             reports_map[report_name] = report_df
 
         return reports_map
+
+    def build_data_for_presentation(self, reports):
+
+        runtime_data = build_runtime_data(reports[Report.TOTAL_RUNTIME])
+
+        favorite_actor_data, best_five_actors, rational_best_actor = build_actors_data(reports[Report.RATING_BY_ACTOR])

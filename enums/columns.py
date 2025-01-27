@@ -22,3 +22,6 @@ class Column:
     NAME = 'name'
     NUM_OF_CONTENTS = 'num_of_contents'
     DIFF_RATING = 'diff_rating'
+    TOTAL_RUNTIME = 'total_runtime'
+    MOVIE_RUNTIME = 'movie_runtime'
+    SERIES_RUNTIME = 'series_runtim'

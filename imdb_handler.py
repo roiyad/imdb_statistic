@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+from enums.columns import Column
+
 
 class ImdbHandler():
     def __init__(self, movie_link):
@@ -9,6 +11,7 @@ class ImdbHandler():
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0'}
         response = requests.get(url=movie_link, headers=headers)
         self.soup = BeautifulSoup(response.text, 'html.parser')
+        full_cast_url = movie_link + '/fullcredits'
 
 
     def get_top_cast(self) -> list:
@@ -52,8 +55,8 @@ class ImdbHandler():
                 break
 
             if is_director_section:
-                final_directors.append({'id': director['href'].split('/')[2],
-                                      'name': director.text.strip()})
+                final_directors.append({Column.DIRECTOR_ID: director['href'].split('/')[2],
+                                      Column.DIRECTOR_NAME: director.text.strip()})
 
         return final_directors
 
