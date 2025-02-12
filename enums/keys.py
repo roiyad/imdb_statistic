@@ -4,3 +4,4 @@ class Key:
     SETTINGS = 'settings'
     GROUP_BY_ID = 'group_by_id'
     INSTANCE = 'instance'
+    SLIDE_TYPE = 'slide_type'
