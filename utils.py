@@ -12,7 +12,7 @@ def add_missing_data_per_movie(movie):
     website_handler = ImdbHandler(movie[Column.URL])
 
     if Column.ACTOR_ID not in movie:
-        actors = website_handler.get_top_cast()
+        actors = website_handler.get_all_cast()
 
         movie.update({Column.ACTOR: actors})
     if Column.DIRECTOR_ID not in movie:

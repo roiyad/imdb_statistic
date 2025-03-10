@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
-import re
 
+from conf import MAX_CAST_PER_CONTENT
 from enums.columns import Column
 
 
@@ -10,26 +10,42 @@ class ImdbHandler():
 
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0'}
         response = requests.get(url=movie_link, headers=headers)
-        self.soup = BeautifulSoup(response.text, 'html.parser')
-        full_cast_url = movie_link + '/fullcredits'
-
+        full_cast_response = requests.get(url=movie_link + '/fullcredits')
+        self.metadata_soup = BeautifulSoup(response.text, 'html.parser')
+        self.full_cast_soup = BeautifulSoup(full_cast_response.text, 'html.parser')
 
     def get_top_cast(self) -> list:
 
-        cast_list = self.soup.find_all('a', {'data-testid': 'title-cast-item__actor'})
+        cast_list = self.metadata_soup.find_all('a', {'data-testid': 'title-cast-item__actor'})
         top_cast = [actor.text.strip() for actor in cast_list]
 
         return top_cast
 
+    def get_all_cast(self) -> list:
+        start_sourceline = self.full_cast_soup.find('h4', id='cast').sourceline
+        end_sourceline = self.full_cast_soup.find('td', text='Rest of cast listed alphabetically:')
+
+        if not end_sourceline:
+            end_sourceline = self.full_cast_soup.find('h4', id='producer')
+
+        end_sourceline = end_sourceline.sourceline
+
+        cast_list = self.full_cast_soup.find_all('a', href=lambda href: href and "/name/nm" in href, text=lambda t: t)
+        cast_list = [actor.text.strip() for actor in cast_list
+                     if start_sourceline < actor.sourceline < end_sourceline]
+        cast_list = cast_list[:min(len(cast_list), MAX_CAST_PER_CONTENT)]
+
+        return cast_list
+
     def get_synopsis(self):
 
-        synopsis = self.soup.find('span', {'data-testid': 'plot-xl'}).text.strip()
+        synopsis = self.metadata_soup.find('span', {'data-testid': 'plot-xl'}).text.strip()
 
         return synopsis
 
     def get_genres(self):
 
-        genre_div = self.soup.find("div", class_="ipc-chip-list__scroller")
+        genre_div = self.metadata_soup.find("div", class_="ipc-chip-list__scroller")
         genres = []
 
         if genre_div:
@@ -39,10 +55,10 @@ class ImdbHandler():
 
         return genres
 
-
     def get_directors(self):
 
-        directors = self.soup.find_all('a', class_='ipc-metadata-list-item__list-content-item ipc-metadata-list-item__list-content-item--link')
+        directors = self.metadata_soup.find_all('a',
+                                                class_='ipc-metadata-list-item__list-content-item ipc-metadata-list-item__list-content-item--link')
         final_directors = []
         is_director_section = False
 
@@ -56,26 +72,26 @@ class ImdbHandler():
 
             if is_director_section:
                 final_directors.append({Column.DIRECTOR_ID: director['href'].split('/')[2],
-                                      Column.DIRECTOR_NAME: director.text.strip()})
+                                        Column.DIRECTOR_NAME: director.text.strip()})
 
         return final_directors
 
     def get_writers(self):
 
-        writers = self.soup.find_all('a', class_='ipc-metadata-list-item__list-content-item ipc-metadata-list-item__list-content-item--link')
+        writers = self.metadata_soup.find_all('a',
+                                              class_='ipc-metadata-list-item__list-content-item ipc-metadata-list-item__list-content-item--link')
         final_writers = []
         is_writer_section = False
-        for writer in writers: 
+        for writer in writers:
 
             if 'Writer' in writer.previous.previous.previous.previous:
                 is_writer_section = True
-            
+
             if 'Star' in writer.previous.previous.previous.previous:
                 break
-            
+
             if is_writer_section:
-                final_writers.append({'id': writer['href'].split('/')[2], 
-                'name':writer.text.strip()})
-        
+                final_writers.append({'id': writer['href'].split('/')[2],
+                                      'name': writer.text.strip()})
+
         return final_writers
-            

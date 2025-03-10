@@ -32,3 +32,8 @@ def test_run_flow_start():
     run_flow = MovieStatisticsFlow('imdb')
 
     reports = run_flow.run_flow('roi_movies.csv')
+
+def test_full_cast():
+    website_handler = ImdbHandler('https://www.imdb.com/title/tt5537002')
+
+    full_cast = website_handler.get_all_cast()

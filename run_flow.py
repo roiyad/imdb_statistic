@@ -30,7 +30,7 @@ class MovieStatisticsFlow:
     def get_movies_df(self, file) -> pd.DataFrame:
         movies_df = pd.read_csv(file)
 
-        movies_df = movies_df.sample(200)
+        movies_df = movies_df
 
         movies_df = self.reshape_movies_df(movies_df)
 
